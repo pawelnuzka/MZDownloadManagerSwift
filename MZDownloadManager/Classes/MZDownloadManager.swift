@@ -32,7 +32,7 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
 
     /**A delegate method called each time whenever any download task's progress is updated
      */
-    @objc func downloadRequestDidUpdateProgress(_ downloadModel: MZDownloadModel, index: Int)
+    @objc optional func downloadRequestDidUpdateProgress(_ downloadModel: MZDownloadModel, index: Int)
     /**A delegate method called when interrupted tasks are repopulated
      */
     @objc func downloadRequestDidPopulatedInterruptedTasks(_ downloadModel: [MZDownloadModel])
@@ -62,8 +62,9 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
     @objc optional func downloadRequestDestinationDoestNotExists(_ downloadModel: MZDownloadModel, index: Int, location: URL)
     
     /**A delegate method called each time whenever any download task's data is received
+     countOfBytesReceived : The number of bytes transferred since the last time this delegate method was called.
      */
-    func downloadRequestDidReceiveData(_ countOfBytesReceived: Int64, countOfBytesExpectedToReceive: Int64)
+    @objc optional func downloadRequestDidReceiveData(_ countOfBytesReceived: Int64)
     
 }
 
@@ -176,7 +177,7 @@ extension MZDownloadManager: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         
          DispatchQueue.main.async(execute: { () -> Void in
-            self.delegate?.downloadRequestDidReceiveData(downloadTask.countOfBytesReceived, countOfBytesExpectedToReceive: downloadTask.countOfBytesExpectedToReceive)
+            self.delegate?.downloadRequestDidReceiveData?(bytesWritten)
         })
     
         for (index, downloadModel) in self.downloadingArray.enumerated() {
@@ -219,7 +220,7 @@ extension MZDownloadManager: URLSessionDownloadDelegate {
                         self.downloadingArray[objectIndex] = downloadModel
                     }
                     
-                    self.delegate?.downloadRequestDidUpdateProgress(downloadModel, index: index)
+                    self.delegate?.downloadRequestDidUpdateProgress?(downloadModel, index: index)
                 })
                 break
             }
