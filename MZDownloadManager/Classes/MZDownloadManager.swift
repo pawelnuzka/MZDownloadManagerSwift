@@ -29,6 +29,7 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
 
 
 @objc public protocol MZDownloadManagerDelegate: class {
+
     /**A delegate method called each time whenever any download task's progress is updated
      */
     @objc func downloadRequestDidUpdateProgress(_ downloadModel: MZDownloadModel, index: Int)
@@ -59,6 +60,10 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
     /**A delegate method called each time whenever specified destination does not exists. It will be called on the session queue. It provides the opportunity to handle error appropriately
      */
     @objc optional func downloadRequestDestinationDoestNotExists(_ downloadModel: MZDownloadModel, index: Int, location: URL)
+    
+    /**A delegate method called each time whenever any download task's data is received
+     */
+    func downloadRequestDidReceiveData(_ countOfBytesReceived: Int64, countOfBytesExpectedToReceive: Int64)
     
 }
 
@@ -169,6 +174,11 @@ extension MZDownloadManager {
 extension MZDownloadManager: URLSessionDownloadDelegate {
     
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+        
+         DispatchQueue.main.async(execute: { () -> Void in
+            self.delegate?.downloadRequestDidReceiveData(downloadTask.countOfBytesReceived, countOfBytesExpectedToReceive: downloadTask.countOfBytesExpectedToReceive)
+        })
+    
         for (index, downloadModel) in self.downloadingArray.enumerated() {
             if downloadTask.isEqual(downloadModel.task) {
                 DispatchQueue.main.async(execute: { () -> Void in
