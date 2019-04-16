@@ -72,7 +72,7 @@ open class MZDownloadManager: NSObject {
     
     fileprivate var sessionManager: URLSession!
     
-    fileprivate var backgroundSessionCompletionHandler: (() -> Void)?
+    open var backgroundSessionCompletionHandler: (() -> Void)?
     
     fileprivate let TaskDescFileNameIndex = 0
     fileprivate let TaskDescFileURLIndex = 1
@@ -349,6 +349,7 @@ extension MZDownloadManager: URLSessionDownloadDelegate {
     
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
         if let backgroundCompletion = self.backgroundSessionCompletionHandler {
+            self.backgroundSessionCompletionHandler = nil
             DispatchQueue.main.async(execute: {
                 backgroundCompletion()
             })
